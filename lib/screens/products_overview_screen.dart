@@ -36,7 +36,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                   value: FilterOptions.Favorites),
               PopupMenuItem(child: Text('Show All'), value: FilterOptions.All),
             ],
-          )
+          ),
         ],
       ),
       body: ProductsGrid(_showOnlyFavorites),
