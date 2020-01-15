@@ -16,8 +16,20 @@ class _ProductScreenState extends State<ProductScreen> {
   final _imageUrlFocusNode = FocusNode();
   final _imageUrlController = TextEditingController();
   final _form = GlobalKey<FormState>();
-  var _product =
-      Product(id: null, title: '', price: 0, description: '', imageUrl: '');
+  var _product = Product(
+    id: null,
+    title: '',
+    price: 0,
+    description: '',
+    imageUrl: '',
+  );
+  var _initValues = {
+    'title': '',
+    'price': '',
+    'description': '',
+    'imageUrl': '',
+  };
+  var _isInit = true;
 
   @override
   void initState() {
@@ -35,6 +47,26 @@ class _ProductScreenState extends State<ProductScreen> {
     super.dispose();
   }
 
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      final productId = ModalRoute.of(context).settings.arguments as String;
+      if (productId != null) {
+        _product = Provider.of<Products>(context).findById(productId);
+        _initValues = {
+          'title': _product.title,
+          'price': _product.price.toString(),
+          'description': _product.description,
+          'imageUrl': '',
+        };
+        _imageUrlController.text = _product.imageUrl;
+      }
+    }
+    _isInit = false;
+
+    super.didChangeDependencies();
+  }
+
   void _updateImageUrl() {
     if (!_imageUrlFocusNode.hasFocus) {
       setState(() {});
@@ -47,7 +79,12 @@ class _ProductScreenState extends State<ProductScreen> {
       return;
     }
     _form.currentState.save();
-    Provider.of<Products>(context, listen: false).addProduct(_product);
+    if (_product.id != null) {
+      Provider.of<Products>(context, listen: false)
+          .updateProduct(_product.id, _product);
+    } else {
+      Provider.of<Products>(context, listen: false).addProduct(_product);
+    }
     Navigator.of(context).pop();
   }
 
@@ -71,6 +108,7 @@ class _ProductScreenState extends State<ProductScreen> {
             children: <Widget>[
               TextFormField(
                 decoration: InputDecoration(labelText: 'Title'),
+                initialValue: _initValues['title'],
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_priceFocusNode);
@@ -80,7 +118,8 @@ class _ProductScreenState extends State<ProductScreen> {
                 },
                 onSaved: (val) {
                   _product = Product(
-                    id: null,
+                    id: _product.id,
+                    isFavorite: _product.isFavorite,
                     title: val,
                     price: _product.price,
                     description: _product.description,
@@ -90,6 +129,7 @@ class _ProductScreenState extends State<ProductScreen> {
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Price'),
+                initialValue: _initValues['price'],
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.number,
                 focusNode: _priceFocusNode,
@@ -100,17 +140,18 @@ class _ProductScreenState extends State<ProductScreen> {
                   if (val.isEmpty) {
                     return 'Please enter a price';
                   }
-                  if(double.tryParse(val) == null){
+                  if (double.tryParse(val) == null) {
                     return 'Please enter a valid number';
                   }
-                  if(double.parse(val)<= 0){
+                  if (double.parse(val) <= 0) {
                     return 'Please enter a number greater than zero';
                   }
                   return null;
                 },
                 onSaved: (val) {
                   _product = Product(
-                    id: null,
+                    id: _product.id,
+                    isFavorite: _product.isFavorite,
                     title: _product.title,
                     price: double.parse(val),
                     description: _product.description,
@@ -120,13 +161,16 @@ class _ProductScreenState extends State<ProductScreen> {
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Description'),
+                initialValue: _initValues['description'],
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,
                 focusNode: _descFocusNode,
-                validator: (val) => val.isEmpty ? 'Please enter a description' : null,
+                validator: (val) =>
+                    val.isEmpty ? 'Please enter a description' : null,
                 onSaved: (val) {
                   _product = Product(
-                    id: null,
+                    id: _product.id,
+                    isFavorite: _product.isFavorite,
                     title: _product.title,
                     price: _product.price,
                     description: val,
@@ -159,13 +203,15 @@ class _ProductScreenState extends State<ProductScreen> {
                       textInputAction: TextInputAction.done,
                       controller: _imageUrlController,
                       focusNode: _imageUrlFocusNode,
-                      validator: (val) => val.isEmpty ? 'Please enter an image URL' : null,
+                      validator: (val) =>
+                          val.isEmpty ? 'Please enter an image URL' : null,
                       onFieldSubmitted: (_) {
                         _saveForm();
                       },
                       onSaved: (val) {
                         _product = Product(
-                          id: null,
+                          id: _product.id,
+                          isFavorite: _product.isFavorite,
                           title: _product.title,
                           price: _product.price,
                           description: _product.description,
