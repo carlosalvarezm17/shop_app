@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app/providers/product.dart';
 
 class ProductScreen extends StatefulWidget {
   static const routeName = '/product';
@@ -10,14 +11,36 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   final _priceFocusNode = FocusNode();
   final _descFocusNode = FocusNode();
+  final _imageUrlFocusNode = FocusNode();
   final _imageUrlController = TextEditingController();
+  final _form = GlobalKey<FormState>();
+  var _product =
+      Product(id: null, title: '', price: 0, description: '', imageUrl: '');
+
+  @override
+  void initState() {
+    _imageUrlFocusNode.addListener(_updateImageUrl);
+    super.initState();
+  }
 
   @override
   void dispose() {
+    _imageUrlFocusNode.removeListener(_updateImageUrl);
     _priceFocusNode.dispose();
     _descFocusNode.dispose();
     _imageUrlController.dispose();
+    _imageUrlFocusNode.dispose();
     super.dispose();
+  }
+
+  void _updateImageUrl() {
+    if (!_imageUrlFocusNode.hasFocus) {
+      setState(() {});
+    }
+  }
+
+  void _saveForm() {
+    _form.currentState.save();
   }
 
   @override
@@ -25,10 +48,17 @@ class _ProductScreenState extends State<ProductScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Product'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.save),
+            onPressed: _saveForm,
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
+          key: _form,
           child: ListView(
             children: <Widget>[
               TextFormField(
@@ -36,6 +66,15 @@ class _ProductScreenState extends State<ProductScreen> {
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_priceFocusNode);
+                },
+                onSaved: (val) {
+                  _product = Product(
+                    id: null,
+                    title: val,
+                    price: _product.price,
+                    description: _product.description,
+                    imageUrl: _product.imageUrl,
+                  );
                 },
               ),
               TextFormField(
@@ -46,12 +85,30 @@ class _ProductScreenState extends State<ProductScreen> {
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_descFocusNode);
                 },
+                onSaved: (val) {
+                  _product = Product(
+                    id: null,
+                    title: _product.title,
+                    price: double.parse(val),
+                    description: _product.description,
+                    imageUrl: _product.imageUrl,
+                  );
+                },
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Description'),
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,
                 focusNode: _descFocusNode,
+                onSaved: (val) {
+                  _product = Product(
+                    id: null,
+                    title: _product.title,
+                    price: _product.price,
+                    description: val,
+                    imageUrl: _product.imageUrl,
+                  );
+                },
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -76,8 +133,20 @@ class _ProductScreenState extends State<ProductScreen> {
                       decoration: InputDecoration(labelText: 'Image URL'),
                       keyboardType: TextInputType.url,
                       textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_)=>setState((){}),
                       controller: _imageUrlController,
+                      focusNode: _imageUrlFocusNode,
+                      onFieldSubmitted: (_) {
+                        _saveForm();
+                      },
+                      onSaved: (val) {
+                        _product = Product(
+                          id: null,
+                          title: _product.title,
+                          price: _product.price,
+                          description: _product.description,
+                          imageUrl: val,
+                        );
+                      },
                     ),
                   ),
                 ],
