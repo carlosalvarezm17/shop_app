@@ -41,7 +41,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
   void _saveForm() {
     final _isValid = _form.currentState.validate();
-    if(!_isValid){
+    if (!_isValid) {
       return;
     }
     _form.currentState.save();
@@ -92,6 +92,18 @@ class _ProductScreenState extends State<ProductScreen> {
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_descFocusNode);
                 },
+                validator: (val) {
+                  if (val.isEmpty) {
+                    return 'Please enter a price';
+                  }
+                  if(double.tryParse(val) == null){
+                    return 'Please enter a valid number';
+                  }
+                  if(double.parse(val)<= 0){
+                    return 'Please enter a number greater than zero';
+                  }
+                  return null;
+                },
                 onSaved: (val) {
                   _product = Product(
                     id: null,
@@ -107,6 +119,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,
                 focusNode: _descFocusNode,
+                validator: (val) => val.isEmpty ? 'Please enter a description' : null,
                 onSaved: (val) {
                   _product = Product(
                     id: null,
@@ -142,6 +155,7 @@ class _ProductScreenState extends State<ProductScreen> {
                       textInputAction: TextInputAction.done,
                       controller: _imageUrlController,
                       focusNode: _imageUrlFocusNode,
+                      validator: (val) => val.isEmpty ? 'Please enter an image URL' : null,
                       onFieldSubmitted: (_) {
                         _saveForm();
                       },
