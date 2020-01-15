@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:shop_app/widgets/cart_item.dart';
 
 class CartItem {
   final String id;
@@ -21,19 +22,18 @@ class Cart with ChangeNotifier {
     return {..._items};
   }
 
-  int get itemCount{
+  int get itemCount {
     return _items.length;
   }
 
-  double get totalAmount{
+  double get totalAmount {
     var total = 0.0;
 
-    _items.forEach((k, i){
-      total += i.price*i.quantity;
+    _items.forEach((k, i) {
+      total += i.price * i.quantity;
     });
 
     return total;
-
   }
 
   void addItem(String productId, double price, String title) {
@@ -61,13 +61,33 @@ class Cart with ChangeNotifier {
     notifyListeners();
   }
 
-  void removeItem(String productId){
+  void removeItem(String productId) {
     _items.remove(productId);
     notifyListeners();
   }
 
-  void clear(){
-    _items={};
+  void removeSingleItem(String productId) {
+    if (!_items.containsKey(productId)) {
+      return;
+    }
+    if (_items[productId].quantity > 1) {
+      _items.update(
+        productId,
+        (existing) => CartItem(
+          id: existing.id,
+          price: existing.price,
+          quantity: existing.quantity - 1,
+          title: existing.title,
+        ),
+      );
+    }else{
+      _items.remove(productId);
+    }
+    notifyListeners();
+  }
+
+  void clear() {
+    _items = {};
     notifyListeners();
   }
 }
