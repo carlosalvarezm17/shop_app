@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ProductScreen extends StatefulWidget {
-
   static const routeName = '/product';
 
   @override
@@ -9,14 +8,15 @@ class ProductScreen extends StatefulWidget {
 }
 
 class _ProductScreenState extends State<ProductScreen> {
-
   final _priceFocusNode = FocusNode();
   final _descFocusNode = FocusNode();
+  final _imageUrlController = TextEditingController();
 
   @override
   void dispose() {
     _priceFocusNode.dispose();
     _descFocusNode.dispose();
+    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -34,7 +34,7 @@ class _ProductScreenState extends State<ProductScreen> {
               TextFormField(
                 decoration: InputDecoration(labelText: 'Title'),
                 textInputAction: TextInputAction.next,
-                onFieldSubmitted: (_){
+                onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_priceFocusNode);
                 },
               ),
@@ -43,7 +43,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.number,
                 focusNode: _priceFocusNode,
-                onFieldSubmitted: (_){
+                onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_descFocusNode);
                 },
               ),
@@ -52,6 +52,35 @@ class _ProductScreenState extends State<ProductScreen> {
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,
                 focusNode: _descFocusNode,
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Container(
+                    width: 100,
+                    height: 100,
+                    margin: EdgeInsets.only(top: 8, right: 10),
+                    decoration: BoxDecoration(
+                        border: Border.all(width: 1, color: Colors.grey)),
+                    child: _imageUrlController.text.isEmpty
+                        ? Text('Enter a URL')
+                        : FittedBox(
+                            child: Image.network(
+                              _imageUrlController.text,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                  ),
+                  Expanded(
+                    child: TextFormField(
+                      decoration: InputDecoration(labelText: 'Image URL'),
+                      keyboardType: TextInputType.url,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_)=>setState((){}),
+                      controller: _imageUrlController,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
