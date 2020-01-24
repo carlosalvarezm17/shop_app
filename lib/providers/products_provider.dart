@@ -65,6 +65,25 @@ class Products with ChangeNotifier {
     return _items.firstWhere((prod) => prod.id == id);
   }
 
+  Future<void> fetchProducts() async{
+    const url = 'https://flutter-update-ceam.firebaseio.com/products.json';
+    final resp = await http.get(url);
+    final extractedData = json.decode(resp.body) as Map<String, dynamic>;
+    final List<Product> loadedProducts = [];
+    extractedData.forEach((prodId, prodData) {
+      loadedProducts.add(Product(
+        id: prodId,
+        title: prodData['title'],
+        description: prodData['description'],
+        price: prodData['price'],
+        isFavorite: prodData['isFavorite'],
+        imageUrl: prodData['imageUrl'],
+      ));
+    });
+    _items = loadedProducts;
+    notifyListeners();
+  }
+
   Future<void> addProduct(Product product) async {
     const url = 'https://flutter-update-ceam.firebaseio.com/products.json';
     try {
