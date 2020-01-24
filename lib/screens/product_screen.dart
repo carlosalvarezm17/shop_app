@@ -89,7 +89,27 @@ class _ProductScreenState extends State<ProductScreen> {
       Navigator.of(context).pop();
       _isLoading = false;
     } else {
-      Provider.of<Products>(context, listen: false).addProduct(_product).then(
+      Provider.of<Products>(context, listen: false)
+          .addProduct(_product)
+          .catchError(
+        (error) {
+          return showDialog<Null>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: Text('An error occurred'),
+              content: Text('Something went wrong'),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('Okay'),
+                  onPressed: (){
+                    Navigator.of(ctx).pop();
+                  },
+                )
+              ],
+            ),
+          );
+        },
+      ).then(
         (_) {
           Navigator.of(context).pop();
           _isLoading = false;
