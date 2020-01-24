@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:shop_app/providers/product.dart';
 
 class Products with ChangeNotifier {
@@ -62,6 +66,17 @@ class Products with ChangeNotifier {
   }
 
   void addProduct(Product product) {
+    const url = 'https://flutter-update-ceam.firebaseio.com/products.json';
+    http.post(
+      url,
+      body: json.encode({
+        'title': product.title,
+        'description': product.description,
+        'imageUrl': product.imageUrl,
+        'price': product.price,
+        'isFavorite': product.isFavorite,
+      }),
+    );
     final newProduct = Product(
       id: DateTime.now().toString(),
       title: product.title,
@@ -73,16 +88,14 @@ class Products with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateProduct(String id, Product newProd){
-
-    final prodIndex = _items.indexWhere((prod)=> prod.id == id);
-    _items[prodIndex]= newProd;
+  void updateProduct(String id, Product newProd) {
+    final prodIndex = _items.indexWhere((prod) => prod.id == id);
+    _items[prodIndex] = newProd;
     notifyListeners();
-
   }
 
-  void deleteProduct(String id){
-    _items.removeWhere((prod)=> prod.id == id);
+  void deleteProduct(String id) {
+    _items.removeWhere((prod) => prod.id == id);
     notifyListeners();
   }
 }
