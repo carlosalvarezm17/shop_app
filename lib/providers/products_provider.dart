@@ -65,7 +65,7 @@ class Products with ChangeNotifier {
     return _items.firstWhere((prod) => prod.id == id);
   }
 
-  Future<void> fetchProducts() async{
+  Future<void> fetchProducts() async {
     const url = 'https://flutter-update-ceam.firebaseio.com/products.json';
     final resp = await http.get(url);
     final extractedData = json.decode(resp.body) as Map<String, dynamic>;
@@ -113,8 +113,18 @@ class Products with ChangeNotifier {
     }
   }
 
-  void updateProduct(String id, Product newProd) {
+  Future<void> updateProduct(String id, Product newProd) async {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
+    final url = 'https://flutter-update-ceam.firebaseio.com/products/$id.json';
+    await http.patch(
+      url,
+      body: json.encode({
+        'title': newProd.title,
+        'description': newProd.description,
+        'imageUrl': newProd.imageUrl,
+        'price': newProd.price,
+      }),
+    );
     _items[prodIndex] = newProd;
     notifyListeners();
   }
