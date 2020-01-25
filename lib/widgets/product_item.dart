@@ -13,6 +13,7 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scaffold = Scaffold.of(context);
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
     return ClipRRect(
@@ -38,7 +39,13 @@ class ProductItem extends StatelessWidget {
                 product.isFavorite ? Icons.favorite : Icons.favorite_border,
               ),
               color: Theme.of(context).accentColor,
-              onPressed: product.toggleFavoriteStatus,
+              onPressed: () async {
+                try {
+                  await product.toggleFavoriteStatus();
+                } catch (err) {
+                  scaffold.showSnackBar(SnackBar(content: Text(err.toString()),));
+                }
+              },
             ),
           ),
           trailing: IconButton(
@@ -46,13 +53,13 @@ class ProductItem extends StatelessWidget {
             color: Theme.of(context).accentColor,
             onPressed: () {
               cart.addItem(product.id, product.price, product.title);
-              Scaffold.of(context).hideCurrentSnackBar();
-              Scaffold.of(context).showSnackBar(
+              scaffold.hideCurrentSnackBar();
+              scaffold.showSnackBar(
                 SnackBar(
                   content: Text('Added item to cart!'),
                   action: SnackBarAction(
                     label: 'UNDO',
-                    onPressed: (){
+                    onPressed: () {
                       cart.removeItem(product.id);
                     },
                   ),
