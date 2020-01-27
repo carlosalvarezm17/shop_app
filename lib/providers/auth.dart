@@ -11,6 +11,19 @@ class Auth with ChangeNotifier {
 
   static const String _apiKey = 'AIzaSyD8eSh0bXP-QUhjBEI-Wfqmi52BWkyyxJo';
 
+  bool get isAuth {
+    return token != null;
+  }
+
+  String get token {
+    if (_expiryDate != null &&
+        _expiryDate.isAfter(DateTime.now()) &&
+        _token != null) {
+      return _token;
+    }
+    return null;
+  }
+
   Future<void> _authenticate(
       String email, String password, String urlSegment) async {
     final url =
@@ -25,9 +38,19 @@ class Auth with ChangeNotifier {
         }),
       );
       final respData = json.decode(resp.body);
-      if(respData['error'] != null){
+      if (respData['error'] != null) {
         throw HttpException(respData['error']['message']);
       }
+      _token = respData['token'];
+      _userId = respData['localId'];
+      _expiryDate = DateTime.now().add(
+        Duration(
+          seconds: int.parse(
+            respData['expiresIn'],
+          ),
+        ),
+      );
+      notifyListeners();
     } catch (err) {
       throw err;
     }
