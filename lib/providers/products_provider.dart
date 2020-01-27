@@ -26,11 +26,12 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchProducts() async {
-    var url = 'https://flutter-update-ceam.firebaseio.com/products.json?auth=$authToken';
+    var url = 'https://flutter-update-ceam.firebaseio.com/products.json?auth=$authToken&orderBy="userId"&equalTo"$userId"';
     final resp = await http.get(url);
     final extractedData = json.decode(resp.body) as Map<String, dynamic>;
     final List<Product> loadedProducts = [];
-    if (extractedData == null) {
+    if (extractedData == null || extractedData.isEmpty) {
+      _items=[];
       return;
     }
     
@@ -61,6 +62,7 @@ class Products with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
+          'userId': userId,
         }),
       );
 
