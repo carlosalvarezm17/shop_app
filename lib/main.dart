@@ -9,6 +9,7 @@ import 'package:shop_app/screens/product_detail_screen.dart';
 import 'package:shop_app/screens/product_screen.dart';
 import 'package:shop_app/screens/products_overview_screen.dart';
 import 'package:shop_app/providers/products_provider.dart';
+import 'package:shop_app/screens/splash-screen.dart';
 import 'package:shop_app/screens/user_products_screen.dart';
 import 'package:shop_app/screens/auth-screen.dart';
 
@@ -24,7 +25,8 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider<Auth, Products>(
           create: (_) => Products('', '', []),
-          update: (ctx, auth, previousProducts) => Products(auth.token, auth.userId, previousProducts.items),
+          update: (ctx, auth, previousProducts) =>
+              Products(auth.token, auth.userId, previousProducts.items),
         ),
         ChangeNotifierProvider.value(
           value: Cart(),
@@ -44,7 +46,15 @@ class MyApp extends StatelessWidget {
             accentColor: Colors.deepOrange,
             fontFamily: 'Lato',
           ),
-          home: authData.isAuth ? ProductsOverviewScreen() : AuthScreen(),
+          home: authData.isAuth
+              ? ProductsOverviewScreen()
+              : FutureBuilder(
+                  future: authData.tryAutolog(),
+                  builder: (ctx, authSnap) =>
+                      authSnap.connectionState == ConnectionState.waiting
+                          ? SplashScreen()
+                          : AuthScreen(),
+                ),
           routes: {
             ProductDetailScreen.routeName: (ctx) => ProductDetailScreen(),
             CartScreen.routeName: (ctx) => CartScreen(),
