@@ -28,12 +28,16 @@ class ProductItem extends StatelessWidget {
               arguments: product.id,
             );
           },
-          child: FadeInImage(
-            placeholder: AssetImage('assets/images/product-placeholder.png'),
-            image: NetworkImage(product.imageUrl, ),
-            fit: BoxFit.cover,
-          ), 
-          
+          child: Hero(
+            tag: product.id,
+            child: FadeInImage(
+              placeholder: AssetImage('assets/images/product-placeholder.png'),
+              image: NetworkImage(
+                product.imageUrl,
+              ),
+              fit: BoxFit.cover,
+            ),
+          ),
         ),
         footer: GridTileBar(
           backgroundColor: Colors.black87,
@@ -45,9 +49,12 @@ class ProductItem extends StatelessWidget {
               color: Theme.of(context).accentColor,
               onPressed: () async {
                 try {
-                  await product.toggleFavoriteStatus(authData.token, authData.userId);
+                  await product.toggleFavoriteStatus(
+                      authData.token, authData.userId);
                 } catch (err) {
-                  scaffold.showSnackBar(SnackBar(content: Text(err.toString()),));
+                  scaffold.showSnackBar(SnackBar(
+                    content: Text(err.toString()),
+                  ));
                 }
               },
             ),
